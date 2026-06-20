@@ -13,4 +13,4 @@
 # ==============================================================
 
 aws_region   = "eu-north-1"
-project_name = "terraform-beginner-project"
+project_name = "terraform-beginner-project-112790"
