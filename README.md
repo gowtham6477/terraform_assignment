@@ -15,6 +15,22 @@ This project uses **Terraform** to automatically provision a set of AWS resource
 
 ---
 
+## Deployed Showcase Screenshots
+
+### 1. Animated Deployment Terminal
+When the page is first loaded, a retro terminal simulator types out the HCL initialization and resource creation steps:
+![Terminal Simulator](images/terminal_animation.png)
+
+### 2. Full-Stack Showcase Dashboard
+A dashboard displaying real-time values, system statistics, Gowtham J's developer bio/skills, and a dark/light mode toggle:
+![Dashboard Overview](images/dashboard_main.png)
+
+### 3. Interactive Architecture Diagram
+A visual flowchart displaying the relationship of AWS components. Clicking any resource node displays its purpose and configuration details:
+![Architecture Diagram](images/architecture_diagram.png)
+
+---
+
 ## Architecture Diagram (Text Format)
 
 ```
