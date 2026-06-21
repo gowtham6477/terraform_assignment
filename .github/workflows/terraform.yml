@@ -1,0 +1,100 @@
+# ==============================================================
+# .github/workflows/terraform.yml
+# --------------------------------------------------------------
+# GitHub Actions CI workflow for Terraform.
+#
+# What this does:
+#   On every push or pull request to the main branch, GitHub
+#   automatically runs three Terraform quality checks:
+#
+#   1. terraform fmt -check
+#      Verifies all .tf files are correctly formatted.
+#      It does NOT change files — it just fails the workflow
+#      if any file is not formatted to Terraform standards.
+#      Fix locally with: terraform fmt
+#
+#   2. terraform init
+#      Downloads the AWS provider plugin so the next steps
+#      can parse and validate the configuration files.
+#      Uses -backend=false so no AWS credentials are needed.
+#
+#   3. terraform validate
+#      Checks that all HCL syntax is valid and all resource
+#      references exist.  This catches typos and missing
+#      variables before you ever run plan or apply.
+#
+# No AWS credentials are required for fmt, init, or validate.
+# ==============================================================
+
+name: Terraform CI
+
+# ── Trigger conditions ─────────────────────────────────────────
+# Run this workflow on pushes AND pull requests targeting main.
+# This ensures code is validated before it can be merged.
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+# ── Jobs ───────────────────────────────────────────────────────
+jobs:
+  terraform:
+    name: Terraform Format, Init & Validate
+    runs-on: ubuntu-latest   # Use GitHub's free Ubuntu runner
+
+    steps:
+      # ── Step 1: Check out the repository ──────────────────────
+      # Downloads the repository code onto the runner machine
+      # so subsequent steps can access the .tf files.
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ── Step 2: Set up Terraform ───────────────────────────────
+      # Installs the specified Terraform version on the runner.
+      # Pinning the version ensures consistent, reproducible CI.
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.9.0"
+
+      # ── Step 3: Terraform Format Check ────────────────────────
+      # Checks that all .tf files are formatted according to
+      # Terraform's style conventions.
+      #
+      # -check   → exit with code 1 if any file needs formatting
+      #            (does NOT modify files — safe for CI)
+      # -diff    → shows a diff of what would change (for logs)
+      # -recursive → checks all subdirectories too
+      #
+      # Fix any failures locally by running: terraform fmt
+      - name: Terraform Format Check
+        run: terraform fmt -check -diff -recursive
+
+      # ── Step 4: Terraform Init ─────────────────────────────────
+      # Initialises the working directory:
+      #   • Downloads the AWS provider plugin (~/.terraform/)
+      #   • Reads .terraform.lock.hcl to use pinned versions
+      #
+      # -backend=false skips backend initialisation so no AWS
+      # credentials or S3 state bucket are needed in CI.
+      - name: Terraform Init
+        run: terraform init -backend=false
+
+      # ── Step 5: Terraform Validate ────────────────────────────
+      # Validates the configuration files without contacting AWS:
+      #   • Checks HCL syntax is correct
+      #   • Verifies all variable references exist
+      #   • Confirms resource arguments are valid
+      #
+      # Because my_ip has no default and we are not applying,
+      # we pass a dummy value via TF_VAR_ environment variable.
+      - name: Terraform Validate
+        run: terraform validate
+        env:
+          # Provide a dummy value for my_ip so validate does not
+          # fail due to a missing required variable.
+          # This is NOT used for any real AWS resource.
+          TF_VAR_my_ip: "0.0.0.0/32"

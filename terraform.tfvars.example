@@ -1,0 +1,39 @@
+# ==============================================================
+# terraform.tfvars.example
+# --------------------------------------------------------------
+# This is a TEMPLATE for the terraform.tfvars file.
+#
+# HOW TO USE:
+#   1. Copy this file:  cp terraform.tfvars.example terraform.tfvars
+#   2. Fill in your real values in terraform.tfvars
+#   3. Never commit terraform.tfvars to Git (it may contain
+#      sensitive IPs or credentials).
+#
+# This .example file IS safe to commit — it only has
+# placeholder values, no real secrets.
+# ==============================================================
+
+# AWS region where all resources will be deployed.
+# eu-north-1 = Stockholm, Sweden (closest to many EU users).
+aws_region = "eu-north-1"
+
+# Short name used to tag and name all resources consistently.
+# Use lowercase letters, numbers, and hyphens only.
+project_name = "terraform-beginner-project"
+
+# Your public IP address in CIDR /32 notation.
+# This restricts SSH access to ONLY your machine.
+#
+# To find your public IP, run in your terminal:
+#   curl https://checkip.amazonaws.com
+# Then append /32:  e.g. "203.0.113.5/32"
+my_ip = "YOUR_PUBLIC_IP/32"
+
+# AMI ID for the EC2 instance.
+# This default points to Amazon Linux 2023 in eu-north-1.
+# AMI IDs are region-specific — update this if you change region.
+ec2_ami = "ami-0c1ac8a41498c1a9c"
+
+# EC2 instance type (hardware size).
+# t3.micro = 2 vCPU, 1 GB RAM — AWS free-tier eligible.
+ec2_instance_type = "t3.micro"

@@ -16,7 +16,7 @@
 # The globally unique name AWS assigned to your S3 bucket.
 # ---------------------------------------------------------------
 output "bucket_name" {
-  description = "The name of the S3 bucket that was created."
+  description = "The name of the S3 bucket (set via bucket_name variable)."
   value       = aws_s3_bucket.main.bucket
 }
 
@@ -37,4 +37,45 @@ output "vpc_id" {
 output "subnet_id" {
   description = "The ID of the public subnet that was created."
   value       = aws_subnet.public.id
+}
+
+# ---------------------------------------------------------------
+# Output: internet_gateway_id
+# The ID of the Internet Gateway — the door between your VPC
+# and the public internet.
+# ---------------------------------------------------------------
+output "internet_gateway_id" {
+  description = "The ID of the Internet Gateway attached to the VPC."
+  value       = aws_internet_gateway.main.id
+}
+
+# ---------------------------------------------------------------
+# Output: security_group_id
+# The ID of the Security Group attached to the EC2 instance.
+# Useful for auditing rules or referencing in other resources.
+# ---------------------------------------------------------------
+output "security_group_id" {
+  description = "The ID of the web security group attached to the EC2 instance."
+  value       = aws_security_group.web.id
+}
+
+# ---------------------------------------------------------------
+# Output: ec2_instance_id
+# The unique identifier AWS assigned to your EC2 virtual machine.
+# ---------------------------------------------------------------
+output "ec2_instance_id" {
+  description = "The ID of the EC2 web server instance."
+  value       = aws_instance.web.id
+}
+
+# ---------------------------------------------------------------
+# Output: ec2_public_ip
+# The public IPv4 address of your EC2 instance.
+# Open http://<this-ip> in a browser to see "Hello Terraform".
+# Note: it may take 1-2 minutes after apply for the web server
+# to finish installing before the page becomes available.
+# ---------------------------------------------------------------
+output "ec2_public_ip" {
+  description = "The public IP address of the EC2 web server. Open http://<this-ip> in your browser."
+  value       = aws_instance.web.public_ip
 }
