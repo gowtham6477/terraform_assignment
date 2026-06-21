@@ -41,3 +41,15 @@ jobs:
         env:
           # Dummy value for validation.
           TF_VAR_my_ip: "0.0.0.0/32"
+
+      # Step 6: Setup TFLint.
+      - name: Setup TFLint
+        uses: terraform-linters/setup-tflint@v4
+        with:
+          tflint_version: v0.50.0
+
+      # Step 7: Initialize and Run TFLint.
+      - name: Run TFLint
+        run: |
+          tflint --init
+          tflint -f compact
