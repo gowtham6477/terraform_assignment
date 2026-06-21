@@ -242,3 +242,23 @@ This project was developed with the assistance of **AI coding tools** (Google De
 | `terraform output` | Show outputs without re-applying |
 | `terraform destroy` | Remove all managed resources |
 | `terraform state list` | List all resources in state file |
+
+---
+
+## Remote State Backend
+
+By default, Terraform stores state files locally. To enable collaboration and lock safety, you can configure a remote state backend.
+A commented-out configuration is provided in `main.tf` using an S3 bucket to store the state file and a DynamoDB table for state locking:
+- **S3 Bucket:** Acts as a secure, centralized storage with versioning and encryption enabled for your state file.
+- **DynamoDB Table:** Prevents concurrent runs by locking the state during applies.
+
+---
+
+## Design Notes
+
+- **Trade-offs:** Deployed a public EC2 instance for simplicity and easy access. In a production environment, instances would be placed inside private subnets and accessed via an Application Load Balancer (ALB) or NAT gateway to reduce exposure.
+- **Production Enhancements:**
+  - Remote state management with DynamoDB lock table.
+  - HTTPS support using AWS Certificate Manager (ACM) and port 443 listeners.
+  - Auto Scaling Groups (ASG) and load balancers to ensure high availability.
+

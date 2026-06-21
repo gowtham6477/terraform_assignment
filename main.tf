@@ -8,6 +8,15 @@ terraform {
       version = "~> 5.0"
     }
   }
+
+  # Backend state storage configuration.
+  # backend "s3" {
+  #   bucket         = "gowtham-terraform-state"
+  #   key            = "state/terraform.tfstate"
+  #   region         = "eu-north-1"
+  #   dynamodb_table = "terraform-state-lock"
+  #   encrypt        = true
+  # }
 }
 
 # AWS provider configuration block.
