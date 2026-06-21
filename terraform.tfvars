@@ -8,5 +8,4 @@ bucket_name  = "gowtham-terraform"
 my_ip = "157.51.138.73/32"
 
 # EC2 instance configuration.
-ec2_ami           = "ami-0c1ac8a41498c1a9c"
 ec2_instance_type = "t3.micro"

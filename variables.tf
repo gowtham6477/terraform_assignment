@@ -27,12 +27,6 @@ variable "my_ip" {
   type        = string
 }
 
-# Amazon Linux 2023 AMI ID.
-variable "ec2_ami" {
-  description = "AMI ID for the EC2 instance. Defaults to Amazon Linux 2023 in eu-north-1."
-  type        = string
-  default     = "ami-0c1ac8a41498c1a9c"
-}
 
 # EC2 hardware instance type.
 variable "ec2_instance_type" {
