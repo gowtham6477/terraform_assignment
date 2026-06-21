@@ -1,9 +1,5 @@
 #!/bin/bash
-# ==============================================================
-# user_data.sh
-# Bootstrap script — runs ONCE as root on first EC2 boot.
-# cloud-init fetches and executes this automatically.
-# ==============================================================
+# EC2 bootstrap script.
 
 # Install Apache web server
 dnf install -y httpd
