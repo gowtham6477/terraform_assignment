@@ -43,6 +43,33 @@ provider "aws" {
 
 
 # ==============================================================
+# DATA SOURCE — LATEST AMAZON LINUX 2023 AMI
+# --------------------------------------------------------------
+# Instead of hard-coding an AMI ID (which can become stale),
+# we look up the LATEST Amazon Linux 2023 AMI at plan time.
+# AWS publishes new AMIs regularly with security patches.
+#
+# owners = ["amazon"] → official AWS-owned images only
+# al2023-ami-*-x86_64 → matches any AL2023 64-bit AMI
+# The most_recent = true picks the newest one automatically.
+# ==============================================================
+data "aws_ami" "amazon_linux_2023" {
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name   = "name"
+    values = ["al2023-ami-*-x86_64"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+}
+
+
+# ==============================================================
 # RESOURCE 1 — S3 BUCKET
 # --------------------------------------------------------------
 # Amazon S3 (Simple Storage Service) is object storage in the
@@ -326,7 +353,8 @@ resource "aws_security_group" "web" {
 #   Detailed explanation below the resource block.
 # ==============================================================
 resource "aws_instance" "web" {
-  ami           = var.ec2_ami
+  # Use the data source AMI — always the latest Amazon Linux 2023.
+  ami           = data.aws_ami.amazon_linux_2023.id
   instance_type = var.ec2_instance_type
 
   # Place the instance in our public subnet inside the VPC.
@@ -338,6 +366,19 @@ resource "aws_instance" "web" {
 
   # Attach the Security Group that allows SSH (22) and HTTP (80).
   vpc_security_group_ids = [aws_security_group.web.id]
+
+  # Automatically replace the instance whenever user_data changes.
+  # Without this, Terraform updates the metadata but the script
+  # does not re-run on an already-running instance.
+  user_data_replace_on_change = true
+
+  # Allow both IMDSv1 and IMDSv2 so cloud-init can always fetch
+  # user_data regardless of the token requirement setting.
+  # "optional" means IMDSv2 tokens are accepted but not required.
+  metadata_options {
+    http_endpoint = "enabled"
+    http_tokens   = "optional"
+  }
 
   # ── user_data: Bootstrap Script ──────────────────────────────
   # This bash script is base64-encoded and stored in the EC2
@@ -355,21 +396,10 @@ resource "aws_instance" "web" {
   #   4. systemctl start    → start Apache right away
   #   5. systemctl enable   → auto-start Apache on every reboot
   # user_data: Bootstrap script executed once on first boot by cloud-init.
-  # IMPORTANT: user_data expects a raw string — Terraform's AWS provider
-  # base64-encodes it automatically before sending to AWS.
-  # We use <<SCRIPT (no hyphen) so content stays at column 0 with no
-  # whitespace stripping — the safest approach.
-  user_data = <<SCRIPT
-#!/bin/bash
-set -ex
-# Redirect all output to a log file for debugging
-exec > /var/log/user-data.log 2>&1
-dnf update -y
-dnf install -y httpd
-printf '<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="UTF-8">\n<title>Hello Terraform</title>\n<style>body{font-family:sans-serif;text-align:center;margin-top:80px;background:#f4f4f4}h1{color:#7B42BC;font-size:3rem}p{color:#555;font-size:1.2rem}</style>\n</head>\n<body>\n<h1>Hello Terraform</h1>\n<p>Deployed with Terraform on AWS EC2 (eu-north-1)</p>\n</body>\n</html>\n' > /var/www/html/index.html
-systemctl enable httpd
-systemctl start httpd
-SCRIPT
+  # Using file() reads scripts/user_data.sh at plan time and passes it
+  # as a plain string. The AWS provider base64-encodes it automatically.
+  # This avoids ALL heredoc / quoting / whitespace issues completely.
+  user_data = file("${path.module}/scripts/user_data.sh")
 
   tags = {
     Name      = "${var.project_name}-web-server"
