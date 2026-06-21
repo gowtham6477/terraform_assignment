@@ -1,0 +1,1210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terraform AWS Showcase | Gowtham J</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      /* Dark Theme (Default) */
+      --bg-primary: #090d16;
+      --bg-secondary: #111827;
+      --card-bg: rgba(17, 24, 39, 0.7);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --text-primary: #f3f4f6;
+      --text-secondary: #9ca3af;
+      --primary: #6366f1; /* Indigo */
+      --primary-hover: #4f46e5;
+      --primary-glow: rgba(99, 102, 241, 0.15);
+      --success: #10b981; /* Emerald */
+      --success-glow: rgba(16, 185, 129, 0.15);
+      --accent: #a855f7; /* Purple */
+      --diagram-bg: rgba(255, 255, 255, 0.02);
+      --diagram-border: rgba(255, 255, 255, 0.06);
+      --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.4);
+      --font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    body.light-mode {
+      /* Light Theme */
+      --bg-primary: #f8fafc;
+      --bg-secondary: #f1f5f9;
+      --card-bg: rgba(255, 255, 255, 0.85);
+      --card-border: rgba(99, 102, 241, 0.15);
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --primary: #4f46e5;
+      --primary-hover: #3730a3;
+      --primary-glow: rgba(79, 70, 229, 0.1);
+      --success: #059669;
+      --success-glow: rgba(5, 150, 105, 0.1);
+      --accent: #7c3aed;
+      --diagram-bg: #ffffff;
+      --diagram-border: rgba(79, 70, 229, 0.1);
+      --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Header & Navigation */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--card-border);
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .profile-info h1 {
+      font-size: 2.2rem;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .profile-info p {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+      margin-top: 4px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    /* Badge and Control Elements */
+    .badge {
+      display: inline-block;
+      padding: 6px 14px;
+      background: var(--primary-glow);
+      border: 1px solid var(--primary);
+      color: var(--primary);
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .theme-toggle-btn {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text-primary);
+      cursor: pointer;
+      padding: 10px 18px;
+      border-radius: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: var(--shadow);
+      font-family: var(--font-family);
+      font-size: 0.9rem;
+    }
+
+    .theme-toggle-btn:hover {
+      border-color: var(--primary);
+      background: var(--primary-glow);
+    }
+
+    /* Live Clock styling */
+    .clock-widget {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 10px 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.9rem;
+      color: var(--success);
+      border-color: rgba(16, 185, 129, 0.3);
+      background: var(--success-glow);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+    }
+
+    /* Grid Layouts */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1.8fr 1.2fr;
+      gap: 30px;
+      margin-bottom: 30px;
+    }
+
+    @media (max-width: 1024px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .glass-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 10px;
+    }
+
+    /* Feature 2: Resource Cards Grid */
+    .cards-section-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-bottom: 20px;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+
+    .resource-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s ease;
+    }
+
+    .resource-card:hover {
+      transform: translateY(-6px);
+      border-color: var(--primary);
+      box-shadow: 0 12px 30px -5px var(--primary-glow), var(--shadow);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 14px;
+    }
+
+    .card-icon {
+      font-size: 1.8rem;
+      background: var(--primary-glow);
+      color: var(--primary);
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      border: 1px solid rgba(99, 102, 241, 0.2);
+    }
+
+    .status-pill {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .status-active {
+      background: var(--success-glow);
+      color: var(--success);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .resource-name {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .resource-desc {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+
+    .resource-meta {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      background: var(--bg-primary);
+      padding: 10px 14px;
+      border-radius: 8px;
+      color: var(--text-primary);
+      border: 1px solid var(--card-border);
+      word-break: break-all;
+    }
+
+    .meta-label {
+      color: var(--primary);
+      font-weight: bold;
+      margin-right: 4px;
+    }
+
+    /* Feature 3: Interactive Architecture Diagram */
+    .architecture-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      background: var(--diagram-bg);
+      border: 1px solid var(--diagram-border);
+      padding: 40px;
+      border-radius: 16px;
+      position: relative;
+    }
+
+    .arch-node {
+      background: var(--bg-secondary);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 14px 28px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      z-index: 2;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      min-width: 220px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .arch-node:hover, .arch-node.active {
+      transform: translateY(-2px) scale(1.02);
+      border-color: var(--primary);
+      box-shadow: 0 0 20px var(--primary-glow);
+    }
+
+    .arch-arrow {
+      font-size: 1.5rem;
+      color: var(--primary);
+      font-weight: 800;
+      user-select: none;
+    }
+
+    .vpc-boundary {
+      border: 2px dashed rgba(99, 102, 241, 0.4);
+      padding: 30px;
+      border-radius: 20px;
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      background: rgba(99, 102, 241, 0.01);
+      position: relative;
+    }
+
+    .vpc-boundary::before {
+      content: 'VPC (__VPC_CIDR__)';
+      position: absolute;
+      top: -10px;
+      left: 20px;
+      background: var(--bg-primary);
+      padding: 0 10px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--primary);
+      letter-spacing: 0.05em;
+    }
+
+    .subnet-boundary {
+      border: 2px dashed rgba(16, 185, 129, 0.4);
+      padding: 24px;
+      border-radius: 16px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: rgba(16, 185, 129, 0.01);
+      position: relative;
+    }
+
+    .subnet-boundary::before {
+      content: 'Public Subnet (__SUBNET_CIDR__)';
+      position: absolute;
+      top: -10px;
+      left: 20px;
+      background: var(--bg-primary);
+      padding: 0 10px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--success);
+      letter-spacing: 0.05em;
+    }
+
+    .s3-node-container {
+      margin-top: 10px;
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .arch-details-panel {
+      margin-top: 20px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 16px;
+      font-size: 0.92rem;
+      line-height: 1.6;
+      width: 100%;
+      min-height: 90px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    /* Feature 4: Learning Section Accordions */
+    .accordion {
+      margin-top: 12px;
+    }
+
+    .accordion-item {
+      border-bottom: 1px solid var(--card-border);
+      padding: 14px 0;
+    }
+
+    .accordion-header {
+      font-weight: 600;
+      font-size: 1.05rem;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .accordion-header:hover {
+      color: var(--primary);
+    }
+
+    .accordion-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease-out;
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-top: 0;
+    }
+
+    .accordion-item.active .accordion-content {
+      margin-top: 10px;
+      max-height: 150px;
+    }
+
+    .accordion-icon {
+      font-size: 0.8rem;
+      transition: transform 0.3s ease;
+    }
+
+    .accordion-item.active .accordion-icon {
+      transform: rotate(90deg);
+    }
+
+    /* Feature 6: About Me & Statistics Styles */
+    .skills-flex {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+      margin-bottom: 24px;
+    }
+
+    .skill-pill {
+      background: var(--bg-secondary);
+      border: 1px solid var(--card-border);
+      color: var(--text-primary);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .skill-pill:hover {
+      border-color: var(--accent);
+      background: rgba(168, 85, 247, 0.05);
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      text-align: center;
+      text-decoration: none;
+      cursor: pointer;
+      font-family: var(--font-family);
+      display: inline-block;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      border: none;
+      box-shadow: 0 4px 14px var(--primary-glow);
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text-primary);
+      border: 1px solid var(--card-border);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-secondary);
+      border-color: var(--primary);
+    }
+
+    .stats-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    .stats-table td {
+      padding: 12px 0;
+      border-bottom: 1px solid var(--card-border);
+      font-size: 0.95rem;
+    }
+
+    .stats-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .stats-label {
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .stats-value {
+      text-align: right;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Feature 5: Animated Deployment Terminal */
+    #terminal-overlay {
+      position: fixed;
+      inset: 0;
+      background-color: #030712;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      transition: opacity 0.5s ease;
+    }
+
+    .terminal-box {
+      width: 100%;
+      max-width: 780px;
+      background: #090d16;
+      border: 1px solid #1f2937;
+      border-radius: 12px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .terminal-header {
+      background: #111827;
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #1f2937;
+    }
+
+    .terminal-dots {
+      display: flex;
+      gap: 8px;
+    }
+
+    .terminal-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 9999px;
+    }
+
+    .dot-red { background: #ef4444; }
+    .dot-yellow { background: #f59e0b; }
+    .dot-green { background: #10b981; }
+
+    .terminal-title {
+      color: #9ca3af;
+      font-size: 0.8rem;
+      font-weight: 600;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .terminal-body {
+      padding: 24px;
+      height: 400px;
+      overflow-y: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.88rem;
+      line-height: 1.6;
+      color: #10b981;
+      text-align: left;
+    }
+
+    .terminal-line {
+      margin-bottom: 8px;
+      word-break: break-all;
+    }
+
+    .terminal-prompt {
+      color: #3b82f6;
+      font-weight: bold;
+      margin-right: 8px;
+    }
+
+    .cmd {
+      color: #f3f4f6;
+      font-weight: 500;
+    }
+
+    .log {
+      color: #9ca3af;
+    }
+
+    .success {
+      color: #34d399;
+      font-weight: 500;
+    }
+
+    .final-success {
+      color: #10b981;
+      font-weight: 700;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      background: rgba(16, 185, 129, 0.1);
+      padding: 8px 12px;
+      border-radius: 6px;
+      display: inline-block;
+      margin-top: 10px;
+    }
+
+    .terminal-actions {
+      background: #111827;
+      padding: 10px 16px;
+      display: flex;
+      justify-content: flex-end;
+      border-top: 1px solid #1f2937;
+    }
+
+    .skip-btn {
+      background: transparent;
+      border: 1px solid #374151;
+      color: #9ca3af;
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .skip-btn:hover {
+      border-color: #4b5563;
+      color: #f3f4f6;
+      background: #1f2937;
+    }
+
+    #dashboard-container {
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 60px;
+      padding-top: 20px;
+      border-top: 1px solid var(--card-border);
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body class="dark-mode">
+
+  <!-- Feature 5: Animated Deployment Terminal -->
+  <div id="terminal-overlay">
+    <div class="terminal-box">
+      <div class="terminal-header">
+        <div class="terminal-dots">
+          <div class="terminal-dot dot-red"></div>
+          <div class="terminal-dot dot-yellow"></div>
+          <div class="terminal-dot dot-green"></div>
+        </div>
+        <div class="terminal-title">terraform apply --auto-approve</div>
+        <div></div>
+      </div>
+      <div class="terminal-body" id="terminal-output">
+        <!-- Lines dynamically inserted via JS -->
+      </div>
+      <div class="terminal-actions">
+        <button class="skip-btn" onclick="skipAnimation()">Skip Animation ❯❯</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dashboard Container -->
+  <div id="dashboard-container" class="container">
+    
+    <!-- Top Header -->
+    <header>
+      <div class="profile-info">
+        <h1>GOWTHAM J</h1>
+        <p>Full Stack Developer</p>
+      </div>
+      <div class="header-actions">
+        <div class="badge">AWS Assignment</div>
+        <div class="clock-widget" id="clock-container">
+          ⏱️ <span id="live-clock">Loading Clock...</span>
+        </div>
+        <button class="theme-toggle-btn" onclick="toggleTheme()" id="theme-btn">
+          🌙 Dark Mode
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Layout -->
+    <div class="dashboard-grid">
+      
+      <!-- Left Column: Diagram & Details -->
+      <div>
+        <div class="glass-card" style="margin-bottom: 30px;">
+          <div class="card-title">
+            <span>🗺️</span> Project Architecture Diagram
+          </div>
+          
+          <!-- Feature 3: Architecture Diagram -->
+          <div class="architecture-container">
+            
+            <div class="arch-node" id="node-internet" onclick="showArchInfo('internet')">
+              🌐 Internet (0.0.0.0/0)
+            </div>
+            
+            <div class="arch-arrow">↓</div>
+            
+            <div class="arch-node" id="node-igw" onclick="showArchInfo('igw')">
+              🔌 Internet Gateway (IGW)
+            </div>
+            
+            <div class="arch-arrow">↓</div>
+            
+            <div class="vpc-boundary">
+              <div class="subnet-boundary">
+                <div class="arch-node" id="node-ec2" onclick="showArchInfo('ec2')">
+                  🖥️ EC2 Web Server Instance
+                </div>
+              </div>
+            </div>
+            
+            <div class="s3-node-container">
+              <div class="arch-node" id="node-s3" onclick="showArchInfo('s3')">
+                🪣 Amazon S3 Object Bucket
+              </div>
+            </div>
+            
+          </div>
+
+          <div class="arch-details-panel" id="arch-details-panel">
+            💡 <strong>Interactive Diagram:</strong> Click any of the elements above to view their details, real AWS IDs, and purpose.
+          </div>
+        </div>
+
+        <!-- Feature 4: Learning Section -->
+        <div class="glass-card">
+          <div class="card-title">
+            <span>📖</span> What Terraform Created
+          </div>
+          <p style="color: var(--text-secondary); font-size: 0.92rem; margin-bottom: 12px;">
+            A breakdown of the core infrastructure components instantiated dynamically on AWS using declarative HCL files:
+          </p>
+          <div class="accordion">
+            <div class="accordion-item" onclick="toggleAccordion(this)">
+              <div class="accordion-header">
+                VPC (Virtual Private Cloud)
+                <span class="accordion-icon">▶</span>
+              </div>
+              <div class="accordion-content">
+                A logically isolated virtual network inside AWS. It defines your own IP address range (10.0.0.0/16), subnets, route tables, and network gateways. It serves as the foundational boundary for security and network topology.
+              </div>
+            </div>
+
+            <div class="accordion-item" onclick="toggleAccordion(this)">
+              <div class="accordion-header">
+                Public Subnet
+                <span class="accordion-icon">▶</span>
+              </div>
+              <div class="accordion-content">
+                A segmented range of IP addresses within the VPC (10.0.1.0/24). By associating this subnet with a route table that directs external traffic to the Internet Gateway, resources in this subnet can acquire public IP addresses and communicate with the outside world.
+              </div>
+            </div>
+
+            <div class="accordion-item" onclick="toggleAccordion(this)">
+              <div class="accordion-header">
+                Security Group (Firewall)
+                <span class="accordion-icon">▶</span>
+              </div>
+              <div class="accordion-content">
+                Acts as a virtual firewall for the EC2 server, controlling inbound and outbound traffic. It is configured to allow inbound HTTP (port 80) from anywhere, restricted SSH (port 22) for administrator access, and all outgoing traffic to download packages.
+              </div>
+            </div>
+
+            <div class="accordion-item" onclick="toggleAccordion(this)">
+              <div class="accordion-header">
+                EC2 (Elastic Compute Cloud) Instance
+                <span class="accordion-icon">▶</span>
+              </div>
+              <div class="accordion-content">
+                A virtual machine in the cloud. It runs a t3.micro instance type in eu-north-1 (Stockholm), backed by Amazon Linux 2023. Upon creation, a bootstrap script (user_data) automatically downloads, configures, and launches Apache to serve this showcase application.
+              </div>
+            </div>
+
+            <div class="accordion-item" onclick="toggleAccordion(this)">
+              <div class="accordion-header">
+                S3 (Simple Storage Service) Bucket
+                <span class="accordion-icon">▶</span>
+              </div>
+              <div class="accordion-content">
+                An industry-standard object storage resource. Highly scalable, durable, and secure, it is created with a globally unique name: <strong>__BUCKET_NAME__</strong>. It is commonly used for file uploads, backups, or hosting frontend client builds.
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right Column: Profile & Stats -->
+      <div style="display: flex; flex-direction: column; gap: 30px;">
+        
+        <!-- Feature 6: About Me -->
+        <div class="glass-card">
+          <div class="card-title">
+            <span>👤</span> About Me
+          </div>
+          <div style="text-align: center; margin-bottom: 16px;">
+            <div style="font-size: 1.3rem; font-weight: 700; color: var(--primary);">Gowtham J</div>
+            <div style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 600; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.05em;">
+              Full Stack Developer
+            </div>
+          </div>
+          <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; text-align: justify;">
+            Highly passionate developer specializing in building modern web applications, designing robust system architectures, and scripting cloud deployments using Infrastructure as Code (IaC) tools like Terraform.
+          </p>
+          
+          <div class="skills-flex">
+            <span class="skill-pill">React</span>
+            <span class="skill-pill">Node.js</span>
+            <span class="skill-pill">Express</span>
+            <span class="skill-pill">MongoDB</span>
+            <span class="skill-pill">MySQL</span>
+            <span class="skill-pill">Terraform</span>
+            <span class="skill-pill">AWS</span>
+            <span class="skill-pill">Linux Bash</span>
+          </div>
+
+          <div class="btn-group">
+            <a href="https://github.com/gowtham6477" target="_blank" class="btn btn-primary">View GitHub</a>
+            <a href="mailto:jgjg6477@gmail.com" class="btn btn-secondary">Contact Me</a>
+          </div>
+        </div>
+
+        <!-- Feature 7: Project Statistics -->
+        <div class="glass-card">
+          <div class="card-title">
+            <span>📊</span> Project Statistics
+          </div>
+          <table class="stats-table">
+            <tr>
+              <td class="stats-label">AWS Region</td>
+              <td class="stats-value" style="color: var(--primary);">__AWS_REGION__</td>
+            </tr>
+            <tr>
+              <td class="stats-label">Resources Created</td>
+              <td class="stats-value">6</td>
+            </tr>
+            <tr>
+              <td class="stats-label">Terraform Files</td>
+              <td class="stats-value">4</td>
+            </tr>
+            <tr>
+              <td class="stats-label">Instance Type</td>
+              <td class="stats-value">__INSTANCE_TYPE__</td>
+            </tr>
+            <tr>
+              <td class="stats-label">Deployment Status</td>
+              <td class="stats-value">
+                <span class="status-pill status-active" style="display: inline-block;">SUCCESS</span>
+              </td>
+            </tr>
+          </table>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Cards Section Header -->
+    <div class="cards-section-title">
+      <span>⚙️</span> Deployed Infrastructure Resources
+    </div>
+
+    <!-- Feature 2: Grid of Resource Cards -->
+    <div class="cards-grid">
+      
+      <!-- VPC Card -->
+      <div class="resource-card">
+        <div>
+          <div class="card-header">
+            <div class="card-icon">🌐</div>
+            <span class="status-pill status-active">Active</span>
+          </div>
+          <div class="resource-name">Virtual Private Cloud</div>
+          <div class="resource-desc">
+            The isolated VPC network segment. Allows all internal services to interact inside the 10.0.0.0/16 IP block.
+          </div>
+        </div>
+        <div class="resource-meta">
+          <span class="meta-label">ID:</span>__VPC_ID__
+        </div>
+      </div>
+
+      <!-- Subnet Card -->
+      <div class="resource-card">
+        <div>
+          <div class="card-header">
+            <div class="card-icon">🗺️</div>
+            <span class="status-pill status-active">Active</span>
+          </div>
+          <div class="resource-name">Public Subnet</div>
+          <div class="resource-desc">
+            A public-facing network segment (10.0.1.0/24). Assigned to availability zone <strong>__AWS_REGION__a</strong>.
+          </div>
+        </div>
+        <div class="resource-meta">
+          <span class="meta-label">ID:</span>__SUBNET_ID__
+        </div>
+      </div>
+
+      <!-- IGW Card -->
+      <div class="resource-card">
+        <div>
+          <div class="card-header">
+            <div class="card-icon">🔌</div>
+            <span class="status-pill status-active">Connected</span>
+          </div>
+          <div class="resource-name">Internet Gateway</div>
+          <div class="resource-desc">
+            The doorway linking the VPC to the internet. Enables public ingress traffic on configured routes.
+          </div>
+        </div>
+        <div class="resource-meta">
+          <span class="meta-label">ID:</span>__INTERNET_GATEWAY_ID__
+        </div>
+      </div>
+
+      <!-- SG Card -->
+      <div class="resource-card">
+        <div>
+          <div class="card-header">
+            <div class="card-icon">🛡️</div>
+            <span class="status-pill status-active">Configured</span>
+          </div>
+          <div class="resource-name">Security Group</div>
+          <div class="resource-desc">
+            Virtual firewall rules. Allows public HTTP ingress on port 80 and SSH ingress on port 22.
+          </div>
+        </div>
+        <div class="resource-meta">
+          <span class="meta-label">ID:</span>__SECURITY_GROUP_ID__
+        </div>
+      </div>
+
+      <!-- EC2 Card -->
+      <div class="resource-card">
+        <div>
+          <div class="card-header">
+            <div class="card-icon">🖥️</div>
+            <span class="status-pill status-active">Running</span>
+          </div>
+          <div class="resource-name">EC2 Web Server</div>
+          <div class="resource-desc">
+            Stockholm host running Amazon Linux 2023. Powered by Apache (httpd). Public IPv4: <strong>__PUBLIC_IP__</strong>.
+          </div>
+        </div>
+        <div class="resource-meta">
+          <span class="meta-label">ID:</span>__INSTANCE_ID__
+        </div>
+      </div>
+
+      <!-- S3 Card -->
+      <div class="resource-card">
+        <div>
+          <div class="card-header">
+            <div class="card-icon">🪣</div>
+            <span class="status-pill status-active">Available</span>
+          </div>
+          <div class="resource-name">S3 Storage Bucket</div>
+          <div class="resource-desc">
+            Secure object store. Deployed with encrypted, versioned storage structures to host static project assets.
+          </div>
+        </div>
+        <div class="resource-meta">
+          <span class="meta-label">Name:</span>__BUCKET_NAME__
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <footer>
+      <p>&copy; 2026 Gowtham J. Designed and deployed automatically using Terraform on Amazon Web Services.</p>
+    </footer>
+
+  </div>
+
+  <script>
+    // Feature 1: Live Clock in format DD-MMM-YYYY hh:mm:ss AM/PM
+    function updateClock() {
+      const now = new Date();
+      const day = String(now.getDate()).padStart(2, '0');
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const month = months[now.getMonth()];
+      const year = now.getFullYear();
+      
+      let hours = now.getHours();
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      hours = hours % 12;
+      hours = hours ? hours : 12; 
+      const strHours = String(hours).padStart(2, '0');
+      
+      const timeStr = day + '-' + month + '-' + year + ' ' + strHours + ':' + minutes + ':' + seconds + ' ' + ampm;
+      document.getElementById('live-clock').innerText = timeStr;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Feature 8: Dark / Light Mode Toggle
+    function toggleTheme() {
+      const body = document.body;
+      const themeBtn = document.getElementById('theme-btn');
+      
+      if (body.classList.contains('light-mode')) {
+        body.classList.remove('light-mode');
+        themeBtn.innerText = '🌙 Dark Mode';
+        localStorage.setItem('theme', 'dark');
+      } else {
+        body.classList.add('light-mode');
+        themeBtn.innerText = '☀️ Light Mode';
+        localStorage.setItem('theme', 'light');
+      }
+    }
+
+    // Apply saved theme preference on load
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'light') {
+        document.body.classList.add('light-mode');
+        document.getElementById('theme-btn').innerText = '☀️ Light Mode';
+      }
+    });
+
+    // Feature 3: Interactive Architecture Diagram Click Handlers
+    const archDetails = {
+      internet: {
+        title: "Internet (0.0.0.0/0)",
+        description: "The public internet routing interface. Traffic on port 80 (HTTP) can freely enter the subnet to reach Apache, while port 22 (SSH) is tightly locked down to administrator access.",
+        status: "Active"
+      },
+      igw: {
+        title: "Internet Gateway (IGW)",
+        description: "Attached to the VPC to enable communication between resources in the VPC and the public internet. Associated ID: __INTERNET_GATEWAY_ID__.",
+        status: "Connected"
+      },
+      ec2: {
+        title: "EC2 Web Server Instance",
+        description: "A virtual host running Amazon Linux 2023 in public subnet. Assigned Instance ID: __INSTANCE_ID__ and IP: __PUBLIC_IP__. Serving this dynamic dashboard via httpd.",
+        status: "Running"
+      },
+      s3: {
+        title: "Amazon S3 Bucket",
+        description: "Secure cloud storage bucket. Configured with name '__BUCKET_NAME__'. Designed for infinite scalability and durably stored static content.",
+        status: "Available"
+      }
+    };
+
+    function showArchInfo(key) {
+      const details = archDetails[key];
+      if (!details) return;
+
+      const panel = document.getElementById('arch-details-panel');
+      panel.innerHTML = '<strong>' + details.title + '</strong> <span class="status-pill status-active" style="display:inline-block; font-size:0.7rem; margin-left:6px;">' + details.status + '</span><div style="margin-top: 6px; color: var(--text-secondary);">' + details.description + '</div>';
+
+      // Highlight active node in diagram
+      document.querySelectorAll('.arch-node').forEach(node => node.classList.remove('active'));
+      document.getElementById('node-' + key).classList.add('active');
+    }
+
+    // Feature 4: Accordion toggle function
+    function toggleAccordion(element) {
+      const isActive = element.classList.contains('active');
+      
+      // Close all accordions
+      document.querySelectorAll('.accordion-item').forEach(item => {
+        item.classList.remove('active');
+      });
+
+      // Toggle current accordion
+      if (!isActive) {
+        element.classList.add('active');
+      }
+    }
+
+    // Feature 5: Animated Deployment Terminal Simulator steps
+    const steps = [
+      { text: "$ terraform init", delay: 250, type: "cmd" },
+      { text: "Initializing the backend...", delay: 150, type: "log" },
+      { text: "Initializing provider plugins...", delay: 150, type: "log" },
+      { text: "- Finding latest version of hashicorp/aws...", delay: 150, type: "log" },
+      { text: "- Installing hashicorp/aws v5.x...", delay: 250, type: "log" },
+      { text: "Terraform has been successfully initialized!", delay: 150, type: "success" },
+      { text: "", delay: 50, type: "log" },
+      { text: "$ terraform apply -auto-approve", delay: 350, type: "cmd" },
+      { text: "aws_vpc.main: Creating...", delay: 150, type: "log" },
+      { text: "✓ aws_vpc.main: Creation complete [ID: __VPC_ID__]", delay: 200, type: "success" },
+      { text: "aws_subnet.public: Creating...", delay: 100, type: "log" },
+      { text: "✓ aws_subnet.public: Creation complete [ID: __SUBNET_ID__]", delay: 150, type: "success" },
+      { text: "aws_internet_gateway.main: Creating...", delay: 100, type: "log" },
+      { text: "✓ aws_internet_gateway.main: Creation complete [ID: __INTERNET_GATEWAY_ID__]", delay: 150, type: "success" },
+      { text: "aws_security_group.web: Creating...", delay: 100, type: "log" },
+      { text: "✓ aws_security_group.web: Creation complete [ID: __SECURITY_GROUP_ID__]", delay: 150, type: "success" },
+      { text: "aws_instance.web: Creating...", delay: 100, type: "log" },
+      { text: "✓ aws_instance.web: Creation complete [ID: __INSTANCE_ID__]", delay: 200, type: "success" },
+      { text: "aws_s3_bucket.main: Creating...", delay: 100, type: "log" },
+      { text: "✓ aws_s3_bucket.main: Creation complete [ID: __BUCKET_NAME__]", delay: 150, type: "success" },
+      { text: "", delay: 100, type: "log" },
+      { text: "Apply complete! Resources: 6 added, 0 changed, 0 destroyed.", delay: 250, type: "final-success" },
+      { text: "Launching Showcase Dashboard...", delay: 300, type: "log" }
+    ];
+
+    let currentStep = 0;
+    const terminalOutput = document.getElementById('terminal-output');
+
+    function runTerminal() {
+      // Avoid looping animation on refresh/subsequent visits in the same session
+      if (sessionStorage.getItem('dashboard_initialized') === 'true') {
+        document.getElementById('terminal-overlay').style.display = 'none';
+        document.getElementById('dashboard-container').style.opacity = '1';
+        return;
+      }
+      
+      if (currentStep < steps.length) {
+        const step = steps[currentStep];
+        const div = document.createElement('div');
+        div.className = 'terminal-line ' + step.type;
+        
+        if (step.type === 'cmd') {
+          div.innerHTML = '<span class="terminal-prompt">></span> ' + step.text;
+        } else {
+          div.innerText = step.text;
+        }
+        
+        terminalOutput.appendChild(div);
+        terminalOutput.scrollTop = terminalOutput.scrollHeight;
+        
+        currentStep++;
+        setTimeout(runTerminal, step.delay);
+      } else {
+        setTimeout(() => {
+          document.getElementById('terminal-overlay').style.opacity = '0';
+          setTimeout(() => {
+            document.getElementById('terminal-overlay').style.display = 'none';
+            document.getElementById('dashboard-container').style.opacity = '1';
+            sessionStorage.setItem('dashboard_initialized', 'true');
+          }, 500);
+        }, 600);
+      }
+    }
+
+    function skipAnimation() {
+      document.getElementById('terminal-overlay').style.display = 'none';
+      document.getElementById('dashboard-container').style.opacity = '1';
+      sessionStorage.setItem('dashboard_initialized', 'true');
+    }
+
+    // Start terminal script running
+    window.addEventListener('DOMContentLoaded', runTerminal);
+  </script>
+</body>
+</html>
