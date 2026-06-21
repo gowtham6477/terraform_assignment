@@ -91,8 +91,8 @@ resource "aws_s3_bucket" "main" {
   # They are completely optional but considered best practice.
   tags = {
     Name        = var.bucket_name
-    Environment = "dev"                        # Useful when you have dev/staging/prod
-    ManagedBy   = "Terraform"                  # Signals this was NOT created by hand
+    Environment = "dev"       # Useful when you have dev/staging/prod
+    ManagedBy   = "Terraform" # Signals this was NOT created by hand
     Project     = var.project_name
   }
 }
